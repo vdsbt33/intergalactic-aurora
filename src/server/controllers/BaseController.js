@@ -51,10 +51,10 @@ class BaseController {
           // Values
               self.fields.forEach(function(value, index) {
             if (value != self.fields[0]) {
-              console.log('I = ' + index + ' / V = ' + value + ' / Val = ' + values_arr[self.prefix + value] + ' - ' + values_arr[2]);
+              console.log('I = ' + index + ' / V = ' + value + ' / Val = ' + values_arr[index] + ' - ' + values_arr.prname + ' || ' + values_arr);
               if (value != self.fields[1])
                 result += ', ';
-              result += values_arr[value];
+              result += values_arr[index];
             }
           });
           result += ' );';

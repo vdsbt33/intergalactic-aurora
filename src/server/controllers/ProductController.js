@@ -37,10 +37,14 @@ class ProductController extends BaseController {
   Route /product/post
   */ 
   async post(req, res) {
-    const { pro_prname, pro_pprice, pro_descri, pro_crdate, pro_eddate, pro_active } = req.body;
+    const { identi, prname, pprice, descri, crdate, eddate, active } = req.body;
 
-    if (!pro_prname && !pro_pprice) 
-    var values = [req.body];
+    console.log('/// ' + prname);
+
+    // if (!prname && !pprice) 
+    //   return 'ERROR. You must insert PRNAME and PPRICE.';
+    
+    var values = [undefined, prname, pprice, descri, crdate, eddate, active];
     var conditions = [];
     console.log(super.getQuery('post', values, new Map(conditions)));
     
