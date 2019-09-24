@@ -1,7 +1,6 @@
 const ProductInfo = require('../../components/models/ProductInfo');
 const BaseController  = require('./BaseController');
 var conn = require('./ConnectionController');
-process.env.TZ = 'BRT';
 
 class ProductController extends BaseController {
   constructor() {
