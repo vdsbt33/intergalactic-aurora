@@ -31,162 +31,112 @@ class BaseController {
   }
 
   // 
-  // Get Update query
-  // 
-  GetUpdateSQL(oldObject, newObject) {
+  GetPostSQL(object) {
     const utils = require('../../addons/utilities');
     let self = this;
+    var result = 'insert into ' + self.table + ' ( ';
+    
+    // Columns
+    self.fields.forEach(function (value, index) {
+      if (object[self.getField(index)] !== undefined) {
+        if (value != self.fields[0]) {
+          if (value != self.fields[1])
+            result += ', ';
+          result += self.getField(index);
+        }
+      }
+    });
+    result += ' ) values ( ';
+    // Values
+      self.fields.forEach(function(value, index) {
+        if (object[self.getField(index)] !== undefined) {
+          if (value != self.fields[0]) {
+
+            if (value != self.fields[1])
+              result += ', ';
+            if (typeof (self.model[self.getField(index)]) == 'string')
+            {  
+              result += '\'' + object[self.getField(index)] + '\'';
+            }
+            else if (typeof (self.model[self.getField(index)]) == 'object') {
+                var value = '';
+              try {
+                value = utils.DateToString(new Date(object[self.getField(index)]));
+              }
+              finally {
+                if (value == '' || value === undefined)
+                  value = object[self.getField(index)];
+                }
+              result += '\'' + value + '\'';
+            } else {
+              result += object[self.getField(index)];
+            }
+          }
+        }
+    });
+    result += ' );';
+
+    return result;
+  }
+
+  // 
+  // Get Update query
+  // 
+  GetUpdateSQL(object) {
+    let self = this;
     var result = 'update ' + self.table + ' set ';
-        
+    
+    var validValues = [];
+    for (var i = 1; i < self.fields.length; i++) {
+      if (object[self.getField(i)] !== undefined && object[self.getField(i)] != '')
+      {
+        validValues.push(i);
+        break;
+      }
+    }
+
+    console.log(validValues);
+
     // Columns - values
-    self.fields.forEach(function(value, index){
-      if (newObject[self.getField(index)] !== undefined) {
-        console.log('VAL = ' + result);
-
-        if (index < self.fields.length && index > 0)
-          result += ', ';
+    validValues.forEach(function(value, index){
+      if (index > 0 && index < validValues.length) {
+        result += ', ';
+      }
       
-        result += ' ' + value + ' = ';
+      console.log(index + '/'+ validValues +' | Q = ' + result);
 
-        if (typeof (self.model[self.getField(index)]) == 'string')
-        {  
-          result += '\'' + newObject[self.getField(index)] + '\'';
-        }
-        else if (typeof (self.model[self.getField(index)]) == 'newObject') {
-          result += '\'' + newObject[self.getField(index)] + '\'';
-        } else {
-          result += newObject[self.getField(index)];
-        }
+      result += ' ' + self.getField(validValues[index]) + ' = ';
+
+      if (typeof (self.model[self.getField(validValues[index])]) == 'string')
+      {  
+        result += '\'' + object[self.getField(validValues[index])] + '\'';
+      }
+      else if (typeof (self.model[self.getField(validValues[index])]) == 'object') {
+        result += '\'' + object[self.getField(validValues[index])] + '\'';
+      } else {
+        result += object[self.getField(validValues[index])];
       }
     });
 
     // Where
-    result += ' where ';
-    self.fields.forEach(function (value, index){
-      if (newObject[self.getField(index)] !== undefined) {
-        if (index < self.fields.length && index > 0)
-          result += ' and ';
-          
-        result += self.getField(index) + " = ";
-
-        if (typeof (self.model[self.getField(index)]) == 'string')
-        {  
-          result += '\'' + oldObject[self.getField(index)] + '\'';
-        }
-        else if (typeof (self.model[self.getField(index)]) == 'object') {
-          result += '\'' + oldObject[self.getField(index)] + '\'';
-        } else {
-          result += oldObject[self.getField(index)];
-        }
-      }
-    });
-    
+    result +=  ' where ' + self.getField(0) + " = " + object[self.getField(0)];
+    console.log('Res = ' + result);
+    return result;
   }
 
   // 
-  // Generate query
+  // Get Delete query
   // 
-  getQuery(type, object, conditions) {
-    const utils = require('../../addons/utilities');
-    
+  GetDeleteSQL(id) {
     let self = this;
-    // object[self.getField(index)]
-    var result = '';
-
-    // if (object === undefined && type != 'post' && type != 'delete' (type != 'post' && conditions.length <= 0))
-    //   throw 'All fields\' values must be present in object and only POST does not need a condition';
-
-    switch (type) {
-      case ('get'):
-
-        break;
-      case ('post'):
-          result += 'insert into ' + self.table + ' ( ';
-          // Columns
-          self.fields.forEach(function (value, index) {
-            if (object[self.getField(index)] !== undefined) {
-              if (value != self.fields[0]) {
-                if (value != self.fields[1])
-                  result += ', ';
-                result += self.getField(index);
-              }
-            }
-          });
-          result += ' ) values ( ';
-          // Values
-            self.fields.forEach(function(value, index) {
-              if (object[self.getField(index)] !== undefined) {
-                if (value != self.fields[0]) {
-
-                  if (value != self.fields[1])
-                    result += ', ';
-                  if (typeof (self.model[self.getField(index)]) == 'string')
-                  {  
-                    result += '\'' + object[self.getField(index)] + '\'';
-                  }
-                  else if (typeof (self.model[self.getField(index)]) == 'object') {
-                      var value = 'a';
-                    try {
-                      value = utils.DateToString(new Date(object[self.getField(index)]));
-                    }
-                    finally {
-                      if (value == 'a' || value === undefined)
-                        value = object[self.getField(index)];
-                      }
-                    result += '\'' + value + '\'';
-                  } else {
-                    result += object[self.getField(index)];
-                  }
-                }
-              }
-          });
-          result += ' );';
-        break;
-      case ('put'):
-        
-        
-        break;
-      case ('delete'):
-
-        result += 'delete from ' + self.table + ' where ';
-        // Columns
-        var conditionsCount = 0;
-        conditions.forEach(function(value, index) {
-          if (value != null && value != undefined && value != '')
-            conditionsCount++;
-        });
-
-        conditions.forEach(function (value, index) {
-          if (value != undefined && value != null && value != '') {
-
-            if (index < conditions.length && index > 0)
-                result += ' and ';
-              
-            result += self.getField(index) + " = ";
-
-            if (typeof (self.model[self.getField(index)]) == 'string')
-            {  
-              result += '\'' + conditions[index] + '\'';
-            }
-            else if (typeof (self.model[self.getField(index)]) == 'object') {
-              result += '\'' + conditions[index] + '\'';
-            } else {
-              result += conditions[index];
-            }
-          }
-        });
-        
-        break;
-    }
-
-    console.log('RESULT = ' + result);
-    return result;
+    
+    return 'delete from ' + self.table + ' where ' + self.getField(0) + ' = ' + id;
   }
 
   // 
   // Returns WHERE conditions of the Controller
   // 
-  getWhere(conditions) {
+  GetWhere(conditions) {
     var result = '';
     let self = this;
 
@@ -194,14 +144,12 @@ class BaseController {
       result += ' where ';
 
 
-      var isFirst = true;
       self.fields.forEach(function (value, index) {
         if (conditions[value] !== undefined) {
-          if (!isFirst)
+          if (index > 0)
             result += ' and ';
-          else
-            isFirst = false;
-          
+
+
           switch (typeof self.model[self.prefix + '_' + value]) {
             case 'number':
               result += self.getField(index) + ' = ' + conditions[value];

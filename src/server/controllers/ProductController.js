@@ -18,8 +18,8 @@ class ProductController extends BaseController {
     const { pro_identi, pro_prname, pro_pprice, pro_descri, pro_crdate, pro_eddate, pro_active } = req.body;
     
 
-    console.log(this.Sql_Get + super.getWhere(req.query));
-    const query = this.Sql_Get + super.getWhere(req.query);
+    console.log(this.Sql_Get + super.GetWhere(req.query));
+    const query = this.Sql_Get + super.GetWhere(req.query);
     
     var objects = [];
     conn().query(query, function(err, result) {
@@ -81,16 +81,16 @@ class ProductController extends BaseController {
   Route /product/put
   */ 
   async put(req, res) {
-    const { oldId, oldName, oldPrice, oldDescription, oldCreationDate, oldEditedDate, oldActive,
-                   newName, newPrice, newDescription, newCreationDate, newEditedDate, newActive
+    const { Id, Name, Price, Description, CreationDate, EditedDate, Active
           } = req.body;
 
-    var oldObject = new ProductInfo(oldId, oldName, oldPrice, oldDescription, oldCreationDate, oldEditedDate, oldActive);
-    var newObject = new ProductInfo(oldId, newName, newPrice, newDescription, newCreationDate, newEditedDate, newActive);
+    var object = new ProductInfo(Id, Name, Price, Description, CreationDate, EditedDate, Active);
+    if (CreationDate === undefined)
+    object.pro_crdate = undefined;
 
-    console.log('/// ' + oldObject);
+    console.log('/// ' + object);
 
-    const query = super.GetUpdateSQL(newObject, oldObject);
+    const query = super.GetUpdateSQL(object);
     
     conn().query(query, function(err, result) {
       if (err) throw err;
